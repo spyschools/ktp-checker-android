@@ -1,0 +1,53 @@
+{
+  "name": "ktp-checker-android",
+  "main": "src/main.ts",
+  "version": "3.2.0",
+  "description": "KTP / NIK Checker Android — NativeScript 9 + Vue 3 + TypeScript. Spy Schools (Fariz Azhari)",
+  "author": "Spy Schools (Fariz Azhari) <https://github.com/spyschools>",
+  "license": "MIT",
+  "homepage": "https://github.com/spyschools/ktp-checker-android",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/spyschools/ktp-checker-android.git"
+  },
+  "bugs": {
+    "url": "https://github.com/spyschools/ktp-checker-android/issues"
+  },
+  "keywords": [
+    "nik",
+    "ktp",
+    "nativescript",
+    "vue",
+    "typescript",
+    "osint",
+    "indonesia"
+  ],
+  "scripts": {
+    "android": "ns run android",
+    "ios": "ns run ios",
+    "clean": "ns clean",
+    "build:android": "ns build android --env.production",
+    "build:android:apk": "ns build android --env.production --release",
+    "type-check": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "@nativescript/core": "~9.1.0",
+    "@nativescript/theme": "~3.1.0",
+    "nativescript-vue": "3.0.0-rc.2",
+    "vue": "^3.5.0",
+    "@nstudio/nativescript-loading-indicator": "^4.3.5",
+    "@nstudio/nativescript-snackbar": "^1.1.2"
+  },
+  "devDependencies": {
+    "@nativescript/android": "~9.1.0",
+    "@nativescript/ios": "~9.1.0",
+    "@nativescript/types": "~9.1.0",
+    "@nativescript/webpack": "~5.0.39",
+    "@types/node": "^20.0.0",
+    "typescript": "~5.5.0",
+    "vue-tsc": "^2.0.0"
+  },
+  "nativescript": {
+    "id": "com.spyschools.ktpchecker"
+  }
+}
