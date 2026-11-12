@@ -1,15 +1,14 @@
-# Build APK otomatis saat push ke main / manual trigger
 name: Build Android APK
 
 on:
+  workflow_dispatch:
   push:
-    branches: [main, master]
-  workflow_dispatch:  # tombol "Run workflow" di GitHub Actions
+    tags:
+      - 'v*'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
 
     steps:
       - name: Checkout
@@ -18,55 +17,50 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: npm
-
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install SDK packages
-        run: |
-          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
-          yes | sdkmanager --licenses || true
+          node-version: '20'
 
       - name: Install NativeScript CLI
         run: npm install -g nativescript
 
-      - name: Install dependencies
+      - name: Install project dependencies
         run: npm install
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android licenses
+        run: yes | sdkmanager --licenses || true
+
+      - name: Install Android packages
+        run: |
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
       - name: Add Android platform
         run: ns platform add android || true
 
-      - name: Build APK (production)
+      - name: Build APK (debug)
         run: ns build android --env.production
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+        continue-on-error: true
 
-      - name: Locate APK
-        id: apk
+      - name: Find APK
+        id: find_apk
         run: |
-          APK=$(find platforms -name "*.apk" 2>/dev/null | head -1)
-          echo "path=$APK" >> $GITHUB_OUTPUT
-          ls -lh "$APK" || (echo "APK not found" && find platforms -type f | head -30 && exit 1)
+          APK=$(find platforms/android -name "*.apk" | head -n 1)
+          echo "APK path: $APK"
+          echo "apk_path=$APK" >> $GITHUB_OUTPUT
+          ls -la platforms/android/app/build/outputs/apk/ || true
 
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: ktp-checker-android
-          path: ${{ steps.apk.outputs.path }}
-          retention-days: 30
-
-      - name: Create Release (on tag)
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: ${{ steps.apk.outputs.path }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          path: |
+            platforms/android/app/build/outputs/apk/**/*.apk
+            **/*.apk
+          if-no-files-found: warn
